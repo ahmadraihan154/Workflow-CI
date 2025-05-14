@@ -22,15 +22,15 @@ def train_model(data_path, n_estimators, output_path):
     # Ensure output directory exists
     os.makedirs(output_path, exist_ok=True)
 
-    # Gunakan experiment yang sama dengan CLI
+    # Set experiment
     mlflow.set_experiment('base-model_experiment_2')
     
-    # Mulai run tanpa menentukan run_name
-    with mlflow.start_run():
+    # Explicitly manage active run
+    with mlflow.start_run() as run:
         # Define model
         model = LGBMRegressor(n_estimators=n_estimators)
         model.fit(X_train, y_train)  
-        
+
         # Predictions
         y_pred_transform = model.predict(X_test)
         y_pred = price_transformer.inverse_transform(y_pred_transform.reshape(-1, 1))
@@ -66,9 +66,6 @@ def train_model(data_path, n_estimators, output_path):
         print(f'RMSE : {rmse_skor}')
         print(f'Model saved to: {model_file}')
     
-    # Ensure the run ends
-    mlflow.end_run()
-
     return model, r2_skor, rmse_skor
 
 if __name__ == '__main__':
