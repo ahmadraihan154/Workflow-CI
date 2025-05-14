@@ -1,4 +1,4 @@
-name: submission_dicoding
+name: submission-project
 
 conda_env: conda.yaml
 
