@@ -1,7 +1,12 @@
-name: mlflow-ci-project
-
-conda_env: conda.yaml  
-
+name: diamond-training
 entry_points:
   main:
-    command: "python modelling.py"  
+    parameters:
+      data_path: {type: str, default: "diamond_preprocessing"}
+      n_estimators: {type: int, default: 100}
+      output_path: {type: str, default: "models"}
+    command: >
+      python modelling.py
+      --data_path {data_path}
+      --n_estimators {n_estimators}
+      --output_path {output_path}
