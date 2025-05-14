@@ -37,7 +37,7 @@ def train_model(n_estimators, max_depth):
         mlflow.log_params(model.get_params())
         mlflow.log_metric("RMSE", rmse_skor)    
         mlflow.log_metric("R2", r2_skor)
-        mlflow.sklearn.log_model(model, artifact_path="model")
+        mlflow.sklearn.log_model(model, artifact_path="model", input_example=X_test[:5])
 
         print(f'R2 Score : {r2_skor}')
         print(f'RMSE : {rmse_skor}')
