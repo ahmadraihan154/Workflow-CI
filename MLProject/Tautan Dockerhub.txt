@@ -1,0 +1,3 @@
+Tautan Docker Hub dari image yang dibuat melalui proses CI/CD di GitHub Actions:
+
+https://hub.docker.com/r/ahmadraihan154/diamond-model
