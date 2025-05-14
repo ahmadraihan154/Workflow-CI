@@ -12,11 +12,11 @@ jobs:
 
     steps:
       # Checkout repo
-      - name: Checkout repository
+      - name: Run actions/checkout@v3
         uses: actions/checkout@v3
 
       # Setup Python
-      - name: Set up Python
+      - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.12.7"
@@ -47,7 +47,7 @@ jobs:
           echo "Latest run_id: $RUN_ID"
 
       # Upload model artifacts to GitHub
-      - name: Upload model artifacts to GitHub
+      - name: Upload to GitHub
         uses: actions/upload-artifact@v4
         with:
           name: trained-model
