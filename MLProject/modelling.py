@@ -1,85 +1,70 @@
-import argparse
+import mlflow
+import pandas as pd
+from lightgbm import LGBMRegressor
 import os
 import numpy as np
-import pandas as pd
-import joblib
-import mlflow
-from lightgbm import LGBMRegressor
-from sklearn.metrics import mean_squared_error, r2_score
 import warnings
-warnings.filterwarnings(action='ignore')
+import sys
+import joblib
+from sklearn.metrics import mean_squared_error, r2_score 
 
-def train_model(data_path, n_estimators, output_path):
-    # Load Data
-    transformer = joblib.load(os.path.join(data_path, 'power_transformers.joblib'))
-    price_transformer = transformer['price']
-    X_train = pd.read_csv(os.path.join(data_path, 'X_train.csv'))
-    y_train = pd.read_csv(os.path.join(data_path, 'y_train.csv'))
-    X_test = pd.read_csv(os.path.join(data_path, 'X_test.csv'))
-    y_test = pd.read_csv(os.path.join(data_path, 'y_test.csv'))
+if __name__ == "__main__":
+    warnings.filterwarnings("ignore")
+    np.random.seed(40)
+
+    # Read the preprocessed data from CSV (set default if not provided)
+    file_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "diamond_preprocessing")
+    X_train = pd.read_csv(os.path.join(file_path, 'X_train.csv'))
+    y_train = pd.read_csv(os.path.join(file_path, 'y_train.csv'))
+    X_test = pd.read_csv(os.path.join(file_path, 'X_test.csv'))
+    y_test = pd.read_csv(os.path.join(file_path, 'y_test.csv'))
+
+    # Load the transformer (assuming you have saved the transformer during preprocessing)
+    transformer = joblib.load(os.path.join(file_path, 'power_transformers.joblib'))
+    price_transformer = transformer['price']  # Assuming price transformer is included
+
+    # Inverse transform the y_test to original scale (before transformation)
     y_test = price_transformer.inverse_transform(y_test.to_numpy().reshape(-1, 1))
 
-    # Ensure output directory exists
-    os.makedirs(output_path, exist_ok=True)
+    # Example input for MLflow logging
+    input_example = X_train[0:5]
 
-    # Set experiment
-    mlflow.set_experiment('base-model_experiment_2')
-    
-    # Explicitly manage active run
-    with mlflow.start_run() as run:
-        # Define model
-        model = LGBMRegressor(n_estimators=n_estimators)
-        model.fit(X_train, y_train)  
+    # Start MLflow run
+    with mlflow.start_run():
+        # Define and train the model
+        model = LGBMRegressor()
+        model.fit(X_train, y_train)
 
         # Predictions
         y_pred_transform = model.predict(X_test)
+
+        # Inverse transform the predictions to original scale
         y_pred = price_transformer.inverse_transform(y_pred_transform.reshape(-1, 1))
-        
-        # Calculate metrics
+
+        # Log the model to MLflow
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            artifact_path="model",
+            input_example=input_example
+        )
+
+        # Log metrics
         r2_skor = r2_score(y_test, y_pred)
-        rmse_skor = np.sqrt(mean_squared_error(y_test, y_pred))
-        
-        # Log parameters and metrics to MLflow
-        mlflow.log_params(model.get_params())
-        mlflow.log_metric("RMSE", rmse_skor)    
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
         mlflow.log_metric("R2", r2_skor)
-        mlflow.sklearn.log_model(model, artifact_path="model")
-        
-        # Save model for GitHub Actions artifact
-        model_file = os.path.join(output_path, 'lgbm_model.joblib')
+        mlflow.log_metric('RMSE', rmse)
+
+        # Ensure the output directory exists before saving the model
+        os.makedirs("models", exist_ok=True)
+
+        # Save model and metrics for GitHub Actions or other output paths
+        model_file = os.path.join("models", 'lgbm_model.joblib')
         joblib.dump(model, model_file)
-        
-        # Save transformer for GitHub Actions artifact
-        transformer_file = os.path.join(output_path, 'transformer.joblib')
-        joblib.dump(transformer, transformer_file)
-        
-        # Save metrics to a file for GitHub Actions artifact
-        metrics = {
-            'r2_score': r2_skor,
-            'rmse': rmse_skor
-        }
-        metrics_file = os.path.join(output_path, 'metrics.joblib')
+
+        metrics = {'r2_score': r2_skor}
+        metrics_file = os.path.join("models", 'metrics.joblib')
         joblib.dump(metrics, metrics_file)
 
-        # Print metrics
-        print(f'R2 Score : {r2_skor}')
-        print(f'RMSE : {rmse_skor}')
-        print(f'Model saved to: {model_file}')
-    
-    return model, r2_skor, rmse_skor
-
-if __name__ == '__main__':
-    # Argument parser for command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data_path', type=str, default='diamond_preprocessing',
-                        help='Path to preprocessed data directory')
-    parser.add_argument('--n_estimators', type=int, default=100, 
-                        help='Number of estimators (trees) in LightGBM model')
-    parser.add_argument('--output_path', type=str, default='models',
-                        help='Path to save model and metrics')
-
-    # Parse arguments
-    args = parser.parse_args()
-
-    # Train the model
-    train_model(args.data_path, args.n_estimators, args.output_path)
+        print(f"Model saved to {model_file}")
+        print(f'RMSE : {rmse}')
+        print(f"R2 Score: {r2_skor}")
