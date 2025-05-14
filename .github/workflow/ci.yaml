@@ -3,24 +3,33 @@ name: MLflow CI Training
 on:
   push:
     branches: [main]
+  workflow_dispatch:  
 
 jobs:
   train-model:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
-
+      
     - name: Set up Conda
       uses: conda-incubator/setup-miniconda@v2
       with:
-        activate-environment: submission-dicoding  # Sesuaikan dengan nama environment di conda.yaml
-        environment-file: Workflow-CI/MLProject/conda.yaml  # Sesuaikan dengan lokasi file conda.yaml
+        activate-environment: diamond-price-prediction  # Sesuai dengan nama di conda.yaml
+        environment-file: Workflow-CI/MLProject/conda.yaml
         auto-activate-base: false
         
     - name: Run MLflow Project
       shell: bash -l {0}  
       run: |
-        cd Workflow-CI/MLProject  
-        mlflow run . --env-manager=conda 
+        cd Workflow-CI/MLProject
+        mlflow run . --env-manager=conda
+        
+    - name: Upload model artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: lgbm-model
+        path: |
+          Workflow-CI/MLProject/models/lgbm_model.joblib
+          Workflow-CI/MLProject/models/transformer.joblib
+          Workflow-CI/MLProject/models/metrics.joblib

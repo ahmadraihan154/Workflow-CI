@@ -1,0 +1,15 @@
+artifact_uri: file:///D:/6.%20Membangun%20Sistem%20Machine%20Learning/Workflow-CI/MLProject/mlruns/581434542245375456/400291a59e304f43b3a45edf794fed2d/artifacts
+end_time: 1747192832483
+entry_point_name: ''
+experiment_id: '581434542245375456'
+lifecycle_stage: active
+run_id: 400291a59e304f43b3a45edf794fed2d
+run_name: LGBM_Base_2
+run_uuid: 400291a59e304f43b3a45edf794fed2d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747192819855
+status: 3
+tags: []
+user_id: USER
