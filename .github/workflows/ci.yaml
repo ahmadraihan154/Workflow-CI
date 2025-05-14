@@ -30,20 +30,19 @@ jobs:
       # Run MLflow project
       - name: Run MLflow project
         run: |
-          cd Workflow-CI/MLProject
-          mlflow run . --env-manager=local
+          mlflow run MLProject --env-manager=local
 
       # Get latest run_id
       - name: Get latest MLflow run_id
         run: |
-          RUN_ID=$(ls -td Workflow-CI/MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f5)
+          RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
       # Build Docker image from model
       - name: Build Docker Image from MLflow model
         run: |
-          mlflow models build-docker --model-uri "Workflow-CI/MLProject/mlruns/0/$RUN_ID/artifacts/model" --name diamond-model
+          mlflow models build-docker --model-uri "MLProject/mlruns/0/$RUN_ID/artifacts/model" --name diamond-model
 
       # Docker login
       - name: Log in to Docker Hub
