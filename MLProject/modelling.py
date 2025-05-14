@@ -17,17 +17,24 @@ def train_model(data_path, n_estimators, output_path):
     y_train = pd.read_csv(os.path.join(data_path, 'y_train.csv'))
     X_test = pd.read_csv(os.path.join(data_path, 'X_test.csv'))
     y_test = pd.read_csv(os.path.join(data_path, 'y_test.csv'))
-    y_test = price_transformer.inverse_transform(y_test.to_numpy().reshape(-1,1))
-    
+    y_test = price_transformer.inverse_transform(y_test.to_numpy().reshape(-1, 1))
+
     # Ensure output directory exists
     os.makedirs(output_path, exist_ok=True)
-    
-    mlflow.set_experiment('base-model_experiment_2')
+
+    # Set experiment in MLflow (ensure experiment exists in MLflow)
+    mlflow.set_experiment('base-model_experiment_2')  # Replace with your experiment name
+
     with mlflow.start_run(run_name='LGBM_Base_2'):
+        # Define model
         model = LGBMRegressor(n_estimators=n_estimators)
         model.fit(X_train, y_train)  
+        
+        # Predictions
         y_pred_transform = model.predict(X_test)
-        y_pred = price_transformer.inverse_transform(y_pred_transform.reshape(-1,1))
+        y_pred = price_transformer.inverse_transform(y_pred_transform.reshape(-1, 1))
+        
+        # Calculate metrics
         r2_skor = r2_score(y_test, y_pred)
         rmse_skor = np.sqrt(mean_squared_error(y_test, y_pred))
         
@@ -52,20 +59,29 @@ def train_model(data_path, n_estimators, output_path):
         }
         metrics_file = os.path.join(output_path, 'metrics.joblib')
         joblib.dump(metrics, metrics_file)
+
+        # Print metrics
+        print(f'R2 Score : {r2_skor}')
+        print(f'RMSE : {rmse_skor}')
+        print(f'Model saved to: {model_file}')
     
-    print(f'R2 Score : {r2_skor}')
-    print(f'RMSE : {rmse_skor}')
-    print(f'Model saved to: {model_file}')
+    # Ensure the run ends
+    mlflow.end_run()
+
     return model, r2_skor, rmse_skor
 
 if __name__ == '__main__':
+    # Argument parser for command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, default='diamond_preprocessing',
-                      help='Path to preprocessed data directory')
+                        help='Path to preprocessed data directory')
     parser.add_argument('--n_estimators', type=int, default=100, 
-                      help='Jumlah Pohon dalam Model LightGBM')
+                        help='Number of estimators (trees) in LightGBM model')
     parser.add_argument('--output_path', type=str, default='models',
-                      help='Path to save model and metrics')
-    
+                        help='Path to save model and metrics')
+
+    # Parse arguments
     args = parser.parse_args()
+
+    # Train the model
     train_model(args.data_path, args.n_estimators, args.output_path)
