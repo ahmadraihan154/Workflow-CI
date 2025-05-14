@@ -22,10 +22,11 @@ def train_model(data_path, n_estimators, output_path):
     # Ensure output directory exists
     os.makedirs(output_path, exist_ok=True)
 
-    # Set experiment in MLflow (ensure experiment exists in MLflow)
-    mlflow.set_experiment('base-model_experiment_2')  # Replace with your experiment name
-
-    with mlflow.start_run(run_name='LGBM_Base_2'):
+    # Gunakan experiment yang sama dengan CLI
+    mlflow.set_experiment('base-model_experiment_2')
+    
+    # Mulai run tanpa menentukan run_name
+    with mlflow.start_run():
         # Define model
         model = LGBMRegressor(n_estimators=n_estimators)
         model.fit(X_train, y_train)  
