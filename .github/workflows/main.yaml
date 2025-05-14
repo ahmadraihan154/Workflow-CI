@@ -21,6 +21,13 @@ jobs:
         with:
           python-version: "3.12.7"
 
+      # Check Env
+      - name: Check Env
+        run: |
+          echo "Python version: $(python --version)"
+          echo "Current directory: $(pwd)"
+          ls -la
+
       # Install dependencies
       - name: Install dependencies
         run: |
