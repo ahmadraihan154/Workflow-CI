@@ -1,0 +1,15 @@
+artifact_uri: file:///D:/6.%20Membangun%20Sistem%20Machine%20Learning/Workflow-CI/MLProject/mlruns/0/4c29649e9e4a4dc9805da8937e9154d7/artifacts
+end_time: 1747218746510
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4c29649e9e4a4dc9805da8937e9154d7
+run_name: resilient-fish-84
+run_uuid: 4c29649e9e4a4dc9805da8937e9154d7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1747218736123
+status: 3
+tags: []
+user_id: USER
