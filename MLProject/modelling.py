@@ -13,7 +13,9 @@ if __name__ == "__main__":
     np.random.seed(40)
 
     # Read the preprocessed data from CSV (set default if not provided)
-    file_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "diamond_preprocessing")
+    file_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "diamond_preprocessing")
+    output_path = sys.argv[2] if len(sys.argv) > 2 else 'models'
+
     X_train = pd.read_csv(os.path.join(file_path, 'X_train.csv'))
     y_train = pd.read_csv(os.path.join(file_path, 'y_train.csv'))
     X_test = pd.read_csv(os.path.join(file_path, 'X_test.csv'))
@@ -55,14 +57,14 @@ if __name__ == "__main__":
         mlflow.log_metric('RMSE', rmse)
 
         # Ensure the output directory exists before saving the model
-        os.makedirs("models", exist_ok=True)
+        os.makedirs(output_path, exist_ok=True)
 
         # Save model and metrics for GitHub Actions or other output paths
-        model_file = os.path.join("models", 'lgbm_model.joblib')
+        model_file = os.path.join(output_path, 'lgbm_model.joblib')
         joblib.dump(model, model_file)
 
         metrics = {'r2_score': r2_skor}
-        metrics_file = os.path.join("models", 'metrics.joblib')
+        metrics_file = os.path.join(output_path, 'metrics.joblib')
         joblib.dump(metrics, metrics_file)
 
         print(f"Model saved to {model_file}")
