@@ -37,15 +37,15 @@ def train_model(data_path, n_estimators, output_path):
         mlflow.log_metric("R2", r2_skor)
         mlflow.sklearn.log_model(model, artifact_path="model")
         
-        # Save model explicitly for GitHub Actions artifact
+        # Save model for GitHub Actions artifact
         model_file = os.path.join(output_path, 'lgbm_model.joblib')
         joblib.dump(model, model_file)
         
-        # Save transformer for later use
+        # Save transformer for GitHub Actions artifact
         transformer_file = os.path.join(output_path, 'transformer.joblib')
         joblib.dump(transformer, transformer_file)
         
-        # Save metrics to a file
+        # Save metrics to a file for GitHub Actions artifact
         metrics = {
             'r2_score': r2_skor,
             'rmse': rmse_skor
